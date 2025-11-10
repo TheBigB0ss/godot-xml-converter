@@ -14,7 +14,7 @@ script = ExtResource("1_xug4f")
 
 [node name="LineEdit1" type="LineEdit" parent="."]
 unique_name_in_owner = true
-layout_mode = 2
+layout_mode = 0
 offset_left = 3.86593
 offset_top = 55.8792
 offset_right = 176.866
@@ -22,7 +22,7 @@ offset_bottom = 86.8792
 
 [node name="LineEdit2" type="LineEdit" parent="."]
 unique_name_in_owner = true
-layout_mode = 2
+layout_mode = 0
 offset_left = 3.86593
 offset_top = 110.912
 offset_right = 176.866
@@ -30,15 +30,28 @@ offset_bottom = 141.912
 
 [node name="SpinBox" type="SpinBox" parent="."]
 unique_name_in_owner = true
-layout_mode = 2
+layout_mode = 0
 offset_left = 59.5353
 offset_top = 154.938
 offset_right = 142.598
 offset_bottom = 185.938
 
+[node name="SpinBox2" type="SpinBox" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 98.9678
+offset_top = 274.3159
+offset_right = 185.5303
+offset_bottom = 305.3159
+min_value = -1.0
+max_value = 1.0
+step = 2.0
+value = -1.0
+editable = false
+
 [node name="CheckBox" type="CheckBox" parent="."]
 unique_name_in_owner = true
-layout_mode = 2
+layout_mode = 0
 offset_left = 87.37
 offset_top = 204.044
 offset_right = 111.37
@@ -46,7 +59,7 @@ offset_bottom = 228.044
 
 [node name="CheckBox2" type="CheckBox" parent="."]
 unique_name_in_owner = true
-layout_mode = 2
+layout_mode = 0
 offset_left = 143.039
 offset_top = 242.99
 offset_right = 167.039
@@ -54,17 +67,18 @@ offset_bottom = 266.99
 
 [node name="CheckBox3" type="CheckBox" parent="."]
 unique_name_in_owner = true
+layout_mode = 0
 offset_left = 69.5867
-offset_top = 279.396
+offset_top = 320.03522
 offset_right = 93.5867
-offset_bottom = 303.396
+offset_bottom = 344.03522
 
 [node name="Button" type="Button" parent="."]
-layout_mode = 2
-offset_left = 5.4123
-offset_top = 324.268
-offset_right = 133.413
-offset_bottom = 355.268
+layout_mode = 0
+offset_left = 5.4123015
+offset_top = 361.5206
+offset_right = 133.41301
+offset_bottom = 392.5206
 text = "Convert"
 
 [node name="Label" type="Label" parent="."]
@@ -108,10 +122,20 @@ offset_bottom = 265.143
 text = "animation player?"
 
 [node name="Label6" type="Label" parent="."]
+layout_mode = 0
+offset_left = 5.4123015
+offset_top = 320.03522
+offset_right = 145.412
+offset_bottom = 343.03522
+text = "txt file?"
+
+[node name="Label7" type="Label" parent="."]
+layout_mode = 0
 offset_left = 5.4123
 offset_top = 279.396
 offset_right = 145.412
 offset_bottom = 302.396
-text = "txt file?"
+text = "rotation fix:"
 
+[connection signal="toggled" from="CheckBox2" to="." method="_on_check_box_2_toggled"]
 [connection signal="pressed" from="Button" to="." method="_on_button_pressed"]

@@ -1,19 +1,27 @@
 @tool
 extends Control
 
+func _on_check_box_2_toggled(toggled_on: bool) -> void:
+	%SpinBox2.editable = toggled_on;
+	
 func _on_button_pressed() -> void:
-	var click = EditorInterface.get_selection()
-	if %CheckBox2.button_pressed == false:
+	var click = EditorInterface.get_selection();
+	
+	var lineText1 = %LineEdit1.text;
+	var lineText2 = %LineEdit2.text;
+	var loop = %CheckBox.button_pressed;
+	var speed = %SpinBox.value;
+	
+	if !%CheckBox2.button_pressed:
 		if %CheckBox3.button_pressed:
-			create_res_by_txt(%LineEdit1.text, %LineEdit2.text, %CheckBox.button_pressed, %SpinBox.value)
+			create_res_by_txt(lineText1, lineText2, loop, speed);
 		else:
-			create_res_file(%LineEdit1.text, %LineEdit2.text, %CheckBox.button_pressed, %SpinBox.value)
-			
-	if %CheckBox2.button_pressed == true:
+			create_res_file(lineText1, lineText2, loop, speed);
+	else:
 		if %CheckBox3.button_pressed:
-			create_tscn_by_txt(%LineEdit1.text, %LineEdit2.text, %CheckBox.button_pressed, %SpinBox.value);
+			create_tscn_by_txt(lineText1, lineText2, loop, speed);
 		else:
-			create_tscn_file(%LineEdit1.text, %LineEdit2.text, %CheckBox.button_pressed, %SpinBox.value)
+			create_tscn_file(lineText1, lineText2, loop, speed);
 			
 func create_tscn_file(image, anim, haveLoop, fps):
 	var node = Node2D.new();
@@ -55,7 +63,8 @@ func create_tscn_file(image, anim, haveLoop, fps):
 			"frameX": fileParser.get_named_attribute_value_safe("frameX").to_int(),
 			"frameY": fileParser.get_named_attribute_value_safe("frameY").to_int(),
 			"frameWidth": fileParser.get_named_attribute_value_safe("frameWidth").to_int(),
-			"frameHeight": fileParser.get_named_attribute_value_safe("frameHeight").to_int()
+			"frameHeight": fileParser.get_named_attribute_value_safe("frameHeight").to_int(),
+			"rotated": fileParser.get_named_attribute_value_safe("rotated") == "true"
 		};
 		
 		if fileParser.get_named_attribute_value_safe("name") != '':
@@ -72,21 +81,36 @@ func create_tscn_file(image, anim, haveLoop, fps):
 			new_anim_data.append_array(xmlList["animation"])
 			
 			new_xmlList = {
-				xmlList["animation"][0]: [xmlList["x"], xmlList["y"], xmlList["width"], xmlList["height"], xmlList["frameX"], xmlList["frameY"], xmlList["frameWidth"], xmlList["frameHeight"]]
+				xmlList["animation"][0]: [
+					xmlList["x"], 
+					xmlList["y"], 
+					xmlList["width"], 
+					xmlList["height"],
+					xmlList["frameX"], 
+					xmlList["frameY"], 
+					xmlList["frameWidth"],
+					xmlList["frameHeight"],
+					xmlList["rotated"]
+				]
 			};
 			data_list.append(new_xmlList)
 			
+	var anim_lib = AnimationLibrary.new();
+	var anim_name = ""
 	for i in new_animation.size():
 		var new_anim = Animation.new();
-		var anim_lib = AnimationLibrary.new();
+		
 		var index = new_anim.add_track(Animation.TYPE_VALUE);
 		var index_offset = new_anim.add_track(Animation.TYPE_VALUE);
-		var anim_name = new_animation[i];
+		var rotation_track = new_anim.add_track(Animation.TYPE_VALUE);
+		
+		anim_name = new_animation[i];
 		
 		new_anim.track_set_interpolation_type(index, Animation.INTERPOLATION_NEAREST);
 		new_anim.track_set_interpolation_type(index_offset, Animation.INTERPOLATION_NEAREST);
 		
 		new_anim.track_set_path(index, "%s:region_rect"%[node.get_path_to(sprite)]);
+		new_anim.track_set_path(rotation_track, "%s:rotation_degrees" % [node.get_path_to(sprite)]);
 		new_anim.track_set_path(index_offset, "%s:offset"%[node.get_path_to(sprite)]);
 		
 		new_anim.loop_mode = haveLoop;
@@ -100,25 +124,36 @@ func create_tscn_file(image, anim, haveLoop, fps):
 						Vector2(data_list[j][key][2], data_list[j][key][3])
 					);
 					
-					var offset_margin = -Vector2(
-						int(data_list[j][key][4]) + (int(data_list[j][key][6]) - int(data_list[j][key][2])) / 2.0,
-						int(data_list[j][key][5]) + ( int(data_list[j][key][7]) - int(data_list[j][key][3])) / 2.0
-					);
+					var offset_margin = Vector2.ZERO;
 					
+					if data_list[j][key].size() > 8 && data_list[j][key][8]:
+						offset_margin = -Vector2(
+							int(data_list[j][key][4]) + (int(data_list[j][key][7]) - int(data_list[j][key][3])) / 2.0,
+							int(data_list[j][key][5]) + (int(data_list[j][key][6]) - int(data_list[j][key][2])) / 2.0
+						);
+						new_anim.track_insert_key(rotation_track, cur_frame * 0.03, 90*%SpinBox2.value);
+					else:
+						offset_margin = -Vector2(
+							int(data_list[j][key][4]) + (int(data_list[j][key][6]) - int(data_list[j][key][2])) / 2.0,
+							int(data_list[j][key][5]) + (int(data_list[j][key][7]) - int(data_list[j][key][3])) / 2.0
+						);
+						new_anim.track_insert_key(rotation_track, cur_frame * 0.03, 0)
+						
 					new_anim.track_insert_key(index, cur_frame * 0.03, region_margin);
 					new_anim.track_insert_key(index_offset, cur_frame * 0.03, offset_margin);
 					new_anim.length = cur_frame*0.03
 					cur_frame += 1;
 					
-		anim_lib.add_animation(" ", new_anim);
-		animPlayer.add_animation_library(new_animation[i], anim_lib);
+		anim_name = anim_name.strip_edges().trim_suffix("/");
+		anim_lib.add_animation(anim_name, new_anim);
 		
+	animPlayer.add_animation_library("", anim_lib);
+	
 	var packed_scene = PackedScene.new();
 	packed_scene.pack(node);
 	
 	ResourceSaver.save(packed_scene, "res://%s"%[anim] + ".tscn", ResourceSaver.FLAG_COMPRESS);
 	
-var created = false;
 func create_res_file(image, anim, haveLoop, fps):
 	var fileParser = XMLParser.new();
 	fileParser.open("res://%s.xml"%[image]);
@@ -148,7 +183,8 @@ func create_res_file(image, anim, haveLoop, fps):
 			"frameX": fileParser.get_named_attribute_value_safe("frameX").to_int(),
 			"frameY": fileParser.get_named_attribute_value_safe("frameY").to_int(),
 			"frameWidth": fileParser.get_named_attribute_value_safe("frameWidth").to_int(),
-			"frameHeight": fileParser.get_named_attribute_value_safe("frameHeight").to_int()
+			"frameHeight": fileParser.get_named_attribute_value_safe("frameHeight").to_int(),
+			"rotated": fileParser.get_named_attribute_value_safe("rotated") == "true"
 		};
 		
 		var frameTexture = AtlasTexture.new();
@@ -166,11 +202,18 @@ func create_res_file(image, anim, haveLoop, fps):
 				Vector2(xmlList["width"], xmlList["height"])
 			);
 			
-			frameTexture.margin = Rect2(
-				 Vector2(-int(xmlList["frameX"]),-int(xmlList["frameY"])),
-				 Vector2(int(xmlList["frameWidth"]) - frameTexture.region.size.x, int(xmlList["frameHeight"]) - frameTexture.region.size.y)
-			);
-			
+			if xmlList["rotated"]:
+				frameTexture.filter_clip = true;
+				frameTexture.margin = Rect2(
+					Vector2(-xmlList["frameY"], -xmlList["frameX"]),
+					Vector2(xmlList["frameHeight"] - frameTexture.region.size.x, ["frameWidth"] - frameTexture.region.size.y)
+				)
+			else:
+				frameTexture.margin = Rect2(
+					 Vector2(-int(xmlList["frameX"]),-int(xmlList["frameY"])),
+					 Vector2(int(xmlList["frameWidth"]) - frameTexture.region.size.x, int(xmlList["frameHeight"]) - frameTexture.region.size.y)
+				);
+				
 			if frameTexture.margin.size.x < abs(frameTexture.margin.position.x):
 				frameTexture.margin.size.x = abs(frameTexture.margin.position.x);
 				
@@ -301,14 +344,19 @@ func create_tscn_by_txt(image, anim, haveLoop, fps):
 			anim_count.append(xml_data[0])
 			
 		cool_data = {
-			anim_name[anim_name.size()-1]: [anim_region_data[0], anim_region_data[1], anim_region_data[2], anim_region_data[3]]
+			anim_name[anim_name.size()-1]: [
+				anim_region_data[0], 
+				anim_region_data[1], 
+				anim_region_data[2], 
+				anim_region_data[3]
+			]
 		};
 		
 		anim_data_list.append(cool_data);
 		
+	var anim_lib = AnimationLibrary.new();
 	for i in anim_name.size():
 		var new_anim = Animation.new();
-		var anim_lib = AnimationLibrary.new();
 		var index = new_anim.add_track(Animation.TYPE_VALUE);
 		var cool_name = anim_name[i];
 		
@@ -330,9 +378,11 @@ func create_tscn_by_txt(image, anim, haveLoop, fps):
 					new_anim.length = cur_frame*0.03
 					cur_frame += 1;
 					
-		anim_lib.add_animation(" ", new_anim);
-		animPlayer.add_animation_library(anim_name[i], anim_lib);
+		cool_name = cool_name.strip_edges().trim_suffix("/");
+		anim_lib.add_animation(cool_name, new_anim);
 		
+	animPlayer.add_animation_library("", anim_lib);
+	
 	var packed_scene = PackedScene.new();
 	packed_scene.pack(node);
 	
