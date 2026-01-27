@@ -49,7 +49,6 @@ func create_tscn_file(image, anim, haveLoop, fps):
 		return;
 		
 	var new_animation = [];
-	var new_xmlList = [];
 	var data_list = [];
 	var new_anim_data = [];
 	
@@ -67,7 +66,8 @@ func create_tscn_file(image, anim, haveLoop, fps):
 			"rotated": fileParser.get_named_attribute_value_safe("rotated") == "true"
 		};
 		
-		if fileParser.get_named_attribute_value_safe("name") != '':
+		var anim_name = fileParser.get_named_attribute_value_safe("name");
+		if fileParser.get_named_attribute_value_safe("name") != "":
 			var animArray = [];
 			for i in fileParser.get_named_attribute_value_safe("name"):
 				animArray.append(i);
@@ -78,11 +78,13 @@ func create_tscn_file(image, anim, haveLoop, fps):
 				if !new_animation.has(i):
 					new_animation.append(i);
 					
+			var new_anim = anim_name.substr(0, len(anim_name) - 4);
+			
 			new_anim_data.append_array(xmlList["animation"])
 			
-			new_xmlList = {
-				xmlList["animation"][0]: [
-					xmlList["x"], 
+			data_list.append({
+				new_anim: [
+					xmlList["x"],
 					xmlList["y"], 
 					xmlList["width"], 
 					xmlList["height"],
@@ -92,11 +94,10 @@ func create_tscn_file(image, anim, haveLoop, fps):
 					xmlList["frameHeight"],
 					xmlList["rotated"]
 				]
-			};
-			data_list.append(new_xmlList)
+			});
 			
 	var anim_lib = AnimationLibrary.new();
-	var anim_name = ""
+	var cur_animName = "";
 	for i in new_animation.size():
 		var new_anim = Animation.new();
 		
@@ -104,10 +105,11 @@ func create_tscn_file(image, anim, haveLoop, fps):
 		var index_offset = new_anim.add_track(Animation.TYPE_VALUE);
 		var rotation_track = new_anim.add_track(Animation.TYPE_VALUE);
 		
-		anim_name = new_animation[i];
+		cur_animName = new_animation[i];
 		
 		new_anim.track_set_interpolation_type(index, Animation.INTERPOLATION_NEAREST);
 		new_anim.track_set_interpolation_type(index_offset, Animation.INTERPOLATION_NEAREST);
+		new_anim.track_set_interpolation_type(rotation_track, Animation.INTERPOLATION_NEAREST);
 		
 		new_anim.track_set_path(index, "%s:region_rect"%[node.get_path_to(sprite)]);
 		new_anim.track_set_path(rotation_track, "%s:rotation_degrees" % [node.get_path_to(sprite)]);
@@ -116,36 +118,44 @@ func create_tscn_file(image, anim, haveLoop, fps):
 		new_anim.loop_mode = haveLoop;
 		
 		var cur_frame = 0;
+		var rotated_frame = false;
 		for j in range(new_anim_data.size()):
+			if data_list[j].has(cur_animName):
+				var rotated = data_list[j][cur_animName].size() > 8 && data_list[j][cur_animName][8];
+				
+				if rotated:
+					rotated_frame = true;
+					
 			for key in data_list[j].keys():
-				if key == anim_name:
-					var region_margin = Rect2(
-						Vector2(data_list[j][key][0], data_list[j][key][1]),
-						Vector2(data_list[j][key][2], data_list[j][key][3])
-					);
+				if key != cur_animName:
+					continue;
 					
-					var offset_margin = Vector2.ZERO;
+				var region_margin = Rect2(
+					Vector2(data_list[j][key][0], data_list[j][key][1]),
+					Vector2(data_list[j][key][2], data_list[j][key][3])
+				);
+				
+				var offset_x = 0.0;
+				var offset_y = 0.0;
+				
+				if rotated_frame:
+					offset_x = int(data_list[j][key][4]);
+					offset_y = int(data_list[j][key][5]);
+				else:
+					offset_x = int(data_list[j][key][4]) + (int(data_list[j][key][6]) - int(data_list[j][key][2])) / 2.0;
+					offset_y = int(data_list[j][key][5]) + (int(data_list[j][key][7]) - int(data_list[j][key][3])) / 2.0;
 					
-					if data_list[j][key].size() > 8 && data_list[j][key][8]:
-						offset_margin = -Vector2(
-							int(data_list[j][key][4]) + (int(data_list[j][key][7]) - int(data_list[j][key][3])) / 2.0,
-							int(data_list[j][key][5]) + (int(data_list[j][key][6]) - int(data_list[j][key][2])) / 2.0
-						);
-						new_anim.track_insert_key(rotation_track, cur_frame * 0.03, 90*%SpinBox2.value);
-					else:
-						offset_margin = -Vector2(
-							int(data_list[j][key][4]) + (int(data_list[j][key][6]) - int(data_list[j][key][2])) / 2.0,
-							int(data_list[j][key][5]) + (int(data_list[j][key][7]) - int(data_list[j][key][3])) / 2.0
-						);
-						new_anim.track_insert_key(rotation_track, cur_frame * 0.03, 0)
-						
-					new_anim.track_insert_key(index, cur_frame * 0.03, region_margin);
-					new_anim.track_insert_key(index_offset, cur_frame * 0.03, offset_margin);
-					new_anim.length = cur_frame*0.03
-					cur_frame += 1;
-					
-		anim_name = anim_name.strip_edges().trim_suffix("/");
-		anim_lib.add_animation(anim_name, new_anim);
+				var offset_margin = Vector2(offset_y, -offset_x) if rotated_frame else -Vector2(offset_x, offset_y);
+				
+				new_anim.track_insert_key(index, cur_frame * 0.03, region_margin);
+				new_anim.track_insert_key(index_offset, cur_frame * 0.03, offset_margin);
+				new_anim.track_insert_key(rotation_track, cur_frame * 0.03, 90*%SpinBox2.value if data_list[j][key].size() > 8 && data_list[j][key][8] else 0.0);
+				new_anim.length = cur_frame*0.03;
+				
+				cur_frame += 1;
+				
+		cur_animName = cur_animName.strip_edges().trim_suffix("/");
+		anim_lib.add_animation(cur_animName, new_anim);
 		
 	animPlayer.add_animation_library("", anim_lib);
 	
@@ -173,6 +183,7 @@ func create_res_file(image, anim, haveLoop, fps):
 	
 	node.add_child(animated_spr);
 	animated_spr.set_owner(node);
+	
 	while fileParser.read() == OK:
 		var xmlList = {
 			"animation": [],
@@ -202,18 +213,11 @@ func create_res_file(image, anim, haveLoop, fps):
 				Vector2(xmlList["width"], xmlList["height"])
 			);
 			
-			if xmlList["rotated"]:
-				frameTexture.filter_clip = true;
-				frameTexture.margin = Rect2(
-					Vector2(-xmlList["frameY"], -xmlList["frameX"]),
-					Vector2(xmlList["frameHeight"] - frameTexture.region.size.x, ["frameWidth"] - frameTexture.region.size.y)
-				)
-			else:
-				frameTexture.margin = Rect2(
-					 Vector2(-int(xmlList["frameX"]),-int(xmlList["frameY"])),
-					 Vector2(int(xmlList["frameWidth"]) - frameTexture.region.size.x, int(xmlList["frameHeight"]) - frameTexture.region.size.y)
-				);
-				
+			frameTexture.margin = Rect2(
+				Vector2(-int(xmlList["frameX"]),-int(xmlList["frameY"])),
+				Vector2(int(xmlList["frameWidth"]) - frameTexture.region.size.x, int(xmlList["frameHeight"]) - frameTexture.region.size.y)
+			);
+			
 			if frameTexture.margin.size.x < abs(frameTexture.margin.position.x):
 				frameTexture.margin.size.x = abs(frameTexture.margin.position.x);
 				
@@ -231,8 +235,6 @@ func create_res_file(image, anim, haveLoop, fps):
 				animationSTUFF.set_animation_speed(curAnimation, fps);
 				
 			animationSTUFF.add_frame(curAnimation, frameTexture);
-			
-			#print("animation is: "+curAnimation);
 			
 	animated_spr.sprite_frames = animationSTUFF;
 	
@@ -387,4 +389,6 @@ func create_tscn_by_txt(image, anim, haveLoop, fps):
 	packed_scene.pack(node);
 	
 	ResourceSaver.save(packed_scene, "res://%s"%[anim] + ".tscn", ResourceSaver.FLAG_COMPRESS);
+	
+	
 	
