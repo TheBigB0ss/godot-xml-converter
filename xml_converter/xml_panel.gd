@@ -32,7 +32,6 @@ func create_tscn_file(image, anim, haveLoop, fps):
 	var sprite = Sprite2D.new();
 	
 	node.name = anim;
-	node.set_script(preload("res://source/characters/characters_scripts/New_Character.gd"));
 	sprite.name = "Character_Sprite";
 	animPlayer.name = "Character_Animation";
 	
@@ -58,7 +57,6 @@ func create_res_file(image, anim, haveLoop, fps):
 	
 	var node = Node2D.new();
 	node.name = anim;
-	node.set_script(preload("res://source/characters/characters_scripts/Character.gd"));
 	
 	var animated_spr = AnimatedSprite2D.new();
 	animated_spr.name = "character";
@@ -92,7 +90,6 @@ func create_res_by_txt(image, anim, haveLoop, fps):
 	var animated_spr = AnimatedSprite2D.new();
 	
 	node.name = anim;
-	node.set_script(preload("res://source/characters/characters_scripts/Character.gd"));
 	animated_spr.name = "character";
 	
 	node.add_child(animated_spr);
@@ -140,7 +137,6 @@ func create_tscn_by_txt(image, anim, haveLoop, fps):
 	var sprite = Sprite2D.new();
 	
 	node.name = anim;
-	node.set_script(preload("res://source/characters/characters_scripts/New_Character.gd"));
 	sprite.name = "Character_Sprite";
 	animPlayer.name = "Character_Animation";
 	
