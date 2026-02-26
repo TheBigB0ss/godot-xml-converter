@@ -20,10 +20,10 @@ offset_bottom = 40.0
 [node name="LineEdit1" type="LineEdit" parent="settings"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 5.412301
-offset_top = 21.166428
+offset_left = 5.4123015
+offset_top = 24.553043
 offset_right = 178.41237
-offset_bottom = 52.16643
+offset_bottom = 55.553047
 
 [node name="LineEdit2" type="LineEdit" parent="settings"]
 unique_name_in_owner = true
@@ -33,21 +33,30 @@ offset_top = 76.19923
 offset_right = 178.41237
 offset_bottom = 107.19923
 
+[node name="LineEdit3" type="LineEdit" parent="settings"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 5.4123015
+offset_top = 126.99844
+offset_right = 178.41237
+offset_bottom = 157.99844
+placeholder_text = "char1,char2, etc"
+
 [node name="SpinBox" type="SpinBox" parent="settings"]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 61.08167
-offset_top = 120.225235
+offset_top = 171.02411
 offset_right = 147.64417
-offset_bottom = 151.22523
+offset_bottom = 202.02411
 
 [node name="SpinBox2" type="SpinBox" parent="settings"]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 100.51417
-offset_top = 239.60312
+offset_top = 280.24243
 offset_right = 187.07668
-offset_bottom = 270.60312
+offset_bottom = 311.24243
 min_value = -1.0
 max_value = 1.0
 step = 2.0
@@ -57,33 +66,33 @@ editable = false
 [node name="CheckBox" type="CheckBox" parent="settings"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 88.916374
-offset_top = 169.33124
-offset_right = 112.916374
-offset_bottom = 193.33124
+offset_left = 83.50408
+offset_top = 210.81685
+offset_right = 107.50408
+offset_bottom = 234.81685
 
 [node name="CheckBox2" type="CheckBox" parent="settings"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 144.58537
-offset_top = 208.27722
-offset_right = 168.58537
-offset_bottom = 232.27722
+offset_left = 130.66843
+offset_top = 248.91628
+offset_right = 154.66843
+offset_bottom = 272.91632
 
 [node name="CheckBox3" type="CheckBox" parent="settings"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 71.133064
-offset_top = 285.32245
-offset_right = 95.133064
-offset_bottom = 309.32245
+offset_left = 58.76213
+offset_top = 325.9618
+offset_right = 82.76213
+offset_bottom = 349.9618
 
 [node name="Button" type="Button" parent="settings"]
 layout_mode = 0
-offset_left = 6.9586735
-offset_top = 326.80783
-offset_right = 134.95938
-offset_bottom = 357.80783
+offset_left = 5.4123015
+offset_top = 364.06122
+offset_right = 133.41301
+offset_bottom = 395.06122
 text = "Convert"
 
 [node name="texts" type="Control" parent="."]
@@ -93,10 +102,10 @@ offset_bottom = 40.0
 
 [node name="Label" type="Label" parent="texts"]
 layout_mode = 0
-offset_left = 5.412301
-offset_top = -5.9265747
+offset_left = 5.4123015
+offset_top = -2.5399587
 offset_right = 45.41227
-offset_bottom = 17.073427
+offset_bottom = 20.460043
 text = "path"
 
 [node name="Label2" type="Label" parent="texts"]
@@ -109,43 +118,51 @@ text = "animation name"
 
 [node name="Label3" type="Label" parent="texts"]
 layout_mode = 0
-offset_left = 6.9586716
-offset_top = 124.45824
+offset_left = 6.958673
+offset_top = 175.25711
 offset_right = 57.95867
-offset_bottom = 147.45824
+offset_bottom = 198.25711
 text = "speed:"
 
 [node name="Label4" type="Label" parent="texts"]
 layout_mode = 0
-offset_left = 6.9586716
-offset_top = 168.48422
+offset_left = 6.958673
+offset_top = 209.12355
 offset_right = 89.95867
-offset_bottom = 191.48422
+offset_bottom = 232.12355
 text = "have loop?"
 
 [node name="Label5" type="Label" parent="texts"]
 layout_mode = 0
-offset_left = 6.9586716
-offset_top = 207.43025
+offset_left = 6.958673
+offset_top = 248.06958
 offset_right = 146.95868
-offset_bottom = 230.43025
+offset_bottom = 271.06958
 text = "animation player?"
 
 [node name="Label6" type="Label" parent="texts"]
 layout_mode = 0
-offset_left = 6.9586735
-offset_top = 285.32245
-offset_right = 146.95837
-offset_bottom = 308.32245
+offset_left = 6.958675
+offset_top = 325.96176
+offset_right = 63.958675
+offset_bottom = 348.96176
 text = "txt file?"
 
 [node name="Label7" type="Label" parent="texts"]
 layout_mode = 0
-offset_left = 6.9586716
-offset_top = 244.68324
+offset_left = 6.958673
+offset_top = 285.32254
 offset_right = 146.95837
-offset_bottom = 267.68323
+offset_bottom = 308.32254
 text = "rotation fix:"
+
+[node name="Label8" type="Label" parent="texts"]
+layout_mode = 0
+offset_left = 6.185492
+offset_top = 105.83174
+offset_right = 134.18549
+offset_bottom = 128.83174
+text = "new anims"
 
 [connection signal="toggled" from="settings/CheckBox2" to="." method="_on_check_box_2_toggled"]
 [connection signal="pressed" from="settings/Button" to="." method="_on_button_pressed"]
