@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://g5r481tpry0f"]
+[gd_scene format=3 uid="uid://g5r481tpry0f"]
 
 [ext_resource type="Script" uid="uid://b7143b0ww7sy7" path="res://addons/xml_converter/xml_panel.gd" id="1_xug4f"]
 

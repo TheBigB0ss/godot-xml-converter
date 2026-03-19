@@ -1,8 +1,17 @@
 @tool
 extends Control
 
-@onready var new_anims = %LineEdit3.text.split(",");
-
+var new_anims = []:
+	set(val):
+		new_anims = val.split(",") if val.contains(",") else [val];
+		if val == "":
+			new_anims = [];
+	get:
+		return new_anims;
+		
+func _ready() -> void:
+	new_anims = %LineEdit3.text;
+	
 func _on_check_box_2_toggled(toggled_on: bool) -> void:
 	%SpinBox2.editable = toggled_on;
 	%LineEdit3.editable = !toggled_on;
@@ -35,7 +44,7 @@ func create_tscn_file(image, anim, haveLoop, fps):
 	sprite.name = "Character_Sprite";
 	animPlayer.name = "Character_Animation";
 	
-	sprite.texture = load("res://assets/%s.png"%[image]);
+	sprite.texture = load("res://%s.png"%[image]);
 	sprite.region_enabled = true;
 	sprite.centered = true;
 	
@@ -49,7 +58,13 @@ func create_tscn_file(image, anim, haveLoop, fps):
 	var packed_scene = PackedScene.new();
 	packed_scene.pack(node);
 	
-	ResourceSaver.save(packed_scene, "res://assets/%s"%[anim] + ".tscn", ResourceSaver.FLAG_COMPRESS);
+	var lib = AnimationLibrary.new();
+	for i in animPlayer.get_animation_list():
+		var libAnim = animPlayer.get_animation(i);
+		lib.add_animation(i, libAnim);
+		
+	ResourceSaver.save(lib, "res://%s"%[anim] + ".tres", ResourceSaver.FLAG_COMPRESS);
+	ResourceSaver.save(packed_scene, "res://%s"%[anim] + ".tscn", ResourceSaver.FLAG_COMPRESS);
 	
 func create_res_file(image, anim, haveLoop, fps):
 	var animationSTUFF = SpriteFrames.new();
@@ -75,12 +90,12 @@ func create_res_file(image, anim, haveLoop, fps):
 	var packed_scene = PackedScene.new();
 	packed_scene.pack(node);
 	
-	ResourceSaver.save(packed_scene, "res://assets/%s.tscn"%[anim], ResourceSaver.FLAG_COMPRESS);
-	ResourceSaver.save(animationSTUFF.duplicate(true), "res://assets/%s.res"%[anim], ResourceSaver.FLAG_COMPRESS)
+	ResourceSaver.save(packed_scene, "res://%s.tscn"%[anim], ResourceSaver.FLAG_COMPRESS);
+	ResourceSaver.save(animationSTUFF, "res://%s.res" % anim, ResourceSaver.FLAG_COMPRESS)
 	
 func create_res_by_txt(image, anim, haveLoop, fps):
 	var txtData = [];
-	var fileParser = FileAccess.open("res://assets/%s.txt"%[image], FileAccess.READ);
+	var fileParser = FileAccess.open("res://%s.txt"%[image], FileAccess.READ);
 	txtData = fileParser.get_as_text().split("\n");
 	
 	var animationSTUFF = SpriteFrames.new();
@@ -98,7 +113,7 @@ func create_res_by_txt(image, anim, haveLoop, fps):
 	for i in txtData:
 		if i != "":
 			var frameTexture = AtlasTexture.new();
-			frameTexture.atlas = load("res://assets/%s.png"%[image]);
+			frameTexture.atlas = load("res://%s.png"%[image]);
 			
 			var xml_data = i.split("=");
 			var anims = xml_data[0].split("_");
@@ -128,8 +143,8 @@ func create_res_by_txt(image, anim, haveLoop, fps):
 	var packed_scene = PackedScene.new();
 	packed_scene.pack(node);
 	
-	ResourceSaver.save(packed_scene, "res://assets/%s"%[anim] + ".tscn", ResourceSaver.FLAG_COMPRESS);
-	ResourceSaver.save(animationSTUFF, "res://assets/%s"%[anim] + ".res", ResourceSaver.FLAG_COMPRESS);
+	ResourceSaver.save(packed_scene, "res://%s"%[anim] + ".tscn", ResourceSaver.FLAG_COMPRESS);
+	ResourceSaver.save(animationSTUFF, "res://%s"%[anim] + ".res", ResourceSaver.FLAG_COMPRESS);
 	
 func create_tscn_by_txt(image, anim, haveLoop, fps):
 	var node = Node2D.new();
@@ -140,7 +155,7 @@ func create_tscn_by_txt(image, anim, haveLoop, fps):
 	sprite.name = "Character_Sprite";
 	animPlayer.name = "Character_Animation";
 	
-	sprite.texture = load("res://assets/%s.png"%[image]);
+	sprite.texture = load("res://%s.png"%[image]);
 	sprite.region_enabled = true;
 	sprite.centered = true;
 	
@@ -150,7 +165,7 @@ func create_tscn_by_txt(image, anim, haveLoop, fps):
 	animPlayer.set_owner(node);
 	
 	var txtData = [];
-	var fileParser = FileAccess.open("res://assets/%s.txt"%[image], FileAccess.READ);
+	var fileParser = FileAccess.open("res://%s.txt"%[image], FileAccess.READ);
 	txtData = fileParser.get_as_text().split("\n");
 	
 	var anim_name = [];
@@ -162,7 +177,7 @@ func create_tscn_by_txt(image, anim, haveLoop, fps):
 	for i in txtData:
 		if i != "":
 			var frameTexture = AtlasTexture.new();
-			frameTexture.atlas = load("res://assets/%s.png"%[image]);
+			frameTexture.atlas = load("res://%s.png"%[image]);
 			
 			var xml_data = i.split("=");
 			var anims = xml_data[0].split("_");
@@ -222,12 +237,11 @@ func create_tscn_by_txt(image, anim, haveLoop, fps):
 	var packed_scene = PackedScene.new();
 	packed_scene.pack(node);
 	
-	ResourceSaver.save(packed_scene, "res://assets/%s"%[anim] + ".tscn", ResourceSaver.FLAG_COMPRESS);
+	ResourceSaver.save(packed_scene, "res://%s"%[anim] + ".tscn", ResourceSaver.FLAG_COMPRESS);
 	
 func add_anim(animPlayer, image, fps, loop, args = []):
-	
 	var fileParser = XMLParser.new();
-	fileParser.open("res://assets/%s.xml"%[image]);
+	fileParser.open("res://%s.xml"%[image]);
 	
 	if fileParser.read() != OK:
 		print("error in %s.xml"%[image]);
@@ -363,7 +377,7 @@ func add_anim(animPlayer, image, fps, loop, args = []):
 				"rotated": fileParser.get_named_attribute_value_safe("rotated") == "true"
 			};
 			var frameTexture = AtlasTexture.new();
-			frameTexture.atlas = load("res://assets/%s.png"%[image])
+			frameTexture.atlas = load("res://%s.png"%[image])
 			
 			if fileParser.get_named_attribute_value_safe("name") != '':
 				var animArray = [];
