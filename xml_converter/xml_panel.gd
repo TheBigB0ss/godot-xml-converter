@@ -267,6 +267,12 @@ func add_anim(animPlayer, image, fps, loop, args = []):
 			};
 			
 			var anim_name = fileParser.get_named_attribute_value_safe("name");
+			if fileParser.get_node_type() != XMLParser.NODE_ELEMENT:
+				continue;
+				
+			if fileParser.get_node_name() != "SubTexture":
+				continue;
+				
 			if fileParser.get_named_attribute_value_safe("name") != "":
 				var animArray = [];
 				for i in fileParser.get_named_attribute_value_safe("name"):
@@ -379,6 +385,12 @@ func add_anim(animPlayer, image, fps, loop, args = []):
 			var frameTexture = AtlasTexture.new();
 			frameTexture.atlas = load("res://%s.png"%[image])
 			
+			if fileParser.get_node_type() != XMLParser.NODE_ELEMENT:
+				continue;
+				
+			if fileParser.get_node_name() != "SubTexture":
+				continue;
+				
 			if fileParser.get_named_attribute_value_safe("name") != '':
 				var animArray = [];
 				for i in fileParser.get_named_attribute_value_safe("name"):
